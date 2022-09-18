@@ -2,7 +2,6 @@ package com.event.qr.backend.eventQR.model;
 
 public class QrTicket {
 
-
     private int id;
     private String ticketId;
     private String orderNo;

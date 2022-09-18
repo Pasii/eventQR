@@ -11,4 +11,8 @@ public interface QrTicketRepository {
     void addTicketDetails(QrTicket qrTicket) throws SQLException, DuplicateRecordException;
 
     String getQrStringByTicketId(int ticketId) throws SQLException;
+
+    String getTicketStatusBYTicketId(int tickectId);
+
+    void updateTicketStatus(int tickectId, String orderNo, String statusAdmitted);
 }

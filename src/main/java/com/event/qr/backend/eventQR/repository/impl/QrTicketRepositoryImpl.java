@@ -3,6 +3,7 @@ package com.event.qr.backend.eventQR.repository.impl;
 import com.event.qr.backend.eventQR.exception.DuplicateRecordException;
 import com.event.qr.backend.eventQR.model.QrTicket;
 import com.event.qr.backend.eventQR.repository.QrTicketRepository;
+import com.event.qr.backend.eventQR.util.AppConstatnt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -62,6 +63,22 @@ public class QrTicketRepositoryImpl implements QrTicketRepository {
         String sql = "select qr_string from qrTicket.QR_TICKET where ticket_id = ? ";
 
         return jdbcTemplate.queryForObject(sql,String.class,ticketId);
+    }
+
+    @Override
+    public String getTicketStatusBYTicketId(int tickectId) {
+
+        String sql = "select ticket_status from qrTicket.QR_TICKET where ticket_id = ? ";
+        return jdbcTemplate.queryForObject(sql,String.class,tickectId);
+    }
+
+    @Override
+    public void updateTicketStatus(int tickectId, String orderNo, String statusAdmitted) {
+
+        String sql = "update qrTicket.QR_TICKET set ticket_status = ? where " +
+                "ticket_id = ? and order_no = ? and ticket_status = ?";
+
+        jdbcTemplate.update(sql,new Object[]{statusAdmitted, tickectId, orderNo, AppConstatnt.STATUS_PENDING});
     }
 
 

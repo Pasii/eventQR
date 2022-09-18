@@ -6,4 +6,10 @@ public class AppConstatnt {
     public static final int RES_CODE_1001 = 1001;
     public static final int RES_CODE_1002 = 1002;
     public static final int RES_CODE_1999 = 1999;
+
+    public static final String STATUS_PENDING = "PENDING";
+    public static final String STATUS_ADMITTED = "ADMITTED";
+
+    public static final String ALREADY_PREOCESSED_MESSAGE = "Ticket is Already Admitted";
+    public static final String TICKET_ADMITED_SUCCESS_MESSAGE = "Ticket has been Admitted successfully";
 }

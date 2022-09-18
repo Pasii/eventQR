@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 public class QRTicketController {
 
@@ -28,7 +29,7 @@ public class QRTicketController {
     @PostMapping("/ticket")
     public Response createQrTicket(@RequestBody QrTicket qrTicket) {
         logger.info("__________createQrTicket : request : "+qrTicket.toString());
-        Response response = qrTicketService.createTicket(qrTicket);
+        QRGeneratorResponse response = qrTicketService.createTicket(qrTicket);
 
         return response;
     }
@@ -38,6 +39,7 @@ public class QRTicketController {
      * @param qrString
      * @return
      */
+    @CrossOrigin(origins = "http://localhost:8080/eventQR")
     @GetMapping("/ticket/{qrString}")
     public QrTicketResponse getQrTicketDetails(@PathVariable String qrString) {
         logger.info("__________getQrTicketDetails : qrId :"+qrString);
@@ -56,7 +58,7 @@ public class QRTicketController {
 
     //set falg for scanned qr
     @PutMapping("/ticket/status/{ticketId}")
-    public Response updateTicketStatus(@PathVariable int tickectId ,@RequestBody QrTicket qrTicket) {
+    public Response updateTicketStatus(@PathVariable(value = "ticketId") int tickectId ,@RequestBody QrTicket qrTicket) {
 
         logger.info("__________ticketId : "+tickectId);
         logger.info("__________updateTicketStatus : request :"+qrTicket);

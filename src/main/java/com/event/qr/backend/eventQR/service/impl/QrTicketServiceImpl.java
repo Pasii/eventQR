@@ -1,7 +1,9 @@
 package com.event.qr.backend.eventQR.service.impl;
 
+import com.event.qr.backend.eventQR.dto.QRGeneratorResponse;
 import com.event.qr.backend.eventQR.dto.QrTicketResponse;
 import com.event.qr.backend.eventQR.dto.Response;
+import com.event.qr.backend.eventQR.exception.AlreadyProcessedException;
 import com.event.qr.backend.eventQR.exception.DuplicateRecordException;
 import com.event.qr.backend.eventQR.model.QrTicket;
 import com.event.qr.backend.eventQR.repository.QrTicketRepository;
@@ -50,11 +52,11 @@ public class QrTicketServiceImpl implements QrTicketService {
     }
 
     @Override
-    public Response createTicket(QrTicket qrTicket) {
+    public QRGeneratorResponse createTicket(QrTicket qrTicket) {
 
         String qrString = null;
         String ticketId = null;
-        Response response = new Response();
+        QRGeneratorResponse response = new QRGeneratorResponse();
 
         try {
 
@@ -72,6 +74,7 @@ public class QrTicketServiceImpl implements QrTicketService {
             qrTicketRepository.addTicketDetails(qrTicket);
             response.setResCode(1000);
             response.setResDescription("success");
+            response.setQrString(qrString);
 
         } catch (DuplicateRecordException e) {
             logger.info("__________DuplicateRecordException :"+e.getMessage());
@@ -112,12 +115,40 @@ public class QrTicketServiceImpl implements QrTicketService {
     @Override
     public Response updateTicketStatus(int tickectId, QrTicket qrTicket) {
 
+        Response response= new Response();
         try {
 
-        } catch (Exception e) {
+            //check is already admited qr
+            checkIsAlreadyAdmitedQr(tickectId);
 
+            qrTicketRepository.updateTicketStatus(tickectId,qrTicket.getOrderNo(),AppConstatnt.STATUS_ADMITTED);
+
+            response.setResCode(AppConstatnt.RES_CODE_SUCCESS);
+            response.setResDescription(AppConstatnt.TICKET_ADMITED_SUCCESS_MESSAGE);
+
+        } catch (EmptyResultDataAccessException e) {
+            logger.info("__________No records found for ticketId...");
+            response.setResCode(AppConstatnt.RES_CODE_1001);
+            response.setResDescription("No records found");
+        }catch (AlreadyProcessedException e) {
+            logger.info("__________Ticket is already processed...");
+            response.setResCode(1003);
+            response.setResDescription(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            response.setResCode(AppConstatnt.RES_CODE_1999);
+            response.setResDescription("Platform Failure");
         }
-        return null;
+        return response;
+    }
+
+    private void checkIsAlreadyAdmitedQr(int tickectId) throws AlreadyProcessedException,EmptyResultDataAccessException  {
+
+        String ticketStatus = qrTicketRepository.getTicketStatusBYTicketId(tickectId);
+        logger.info("status :"+ticketStatus);
+        if (!ticketStatus.equals(AppConstatnt.STATUS_PENDING)) {
+            throw new AlreadyProcessedException(AppConstatnt.ALREADY_PREOCESSED_MESSAGE);
+        }
     }
 
 
