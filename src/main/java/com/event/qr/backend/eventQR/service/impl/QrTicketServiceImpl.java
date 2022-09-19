@@ -1,23 +1,33 @@
 package com.event.qr.backend.eventQR.service.impl;
 
+import com.event.qr.backend.eventQR.client.SmsApiClient;
 import com.event.qr.backend.eventQR.dto.QRGeneratorResponse;
 import com.event.qr.backend.eventQR.dto.QrTicketResponse;
 import com.event.qr.backend.eventQR.dto.Response;
+import com.event.qr.backend.eventQR.dto.SmsSendRequest;
 import com.event.qr.backend.eventQR.exception.AlreadyProcessedException;
 import com.event.qr.backend.eventQR.exception.DuplicateRecordException;
+import com.event.qr.backend.eventQR.exception.InvalidFormatException;
+import com.event.qr.backend.eventQR.exception.SendSmsException;
+import com.event.qr.backend.eventQR.model.MessageElement;
 import com.event.qr.backend.eventQR.model.QrTicket;
 import com.event.qr.backend.eventQR.repository.QrTicketRepository;
 import com.event.qr.backend.eventQR.service.QrTicketService;
 import com.event.qr.backend.eventQR.util.AppConstatnt;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLOutput;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class QrTicketServiceImpl implements QrTicketService {
@@ -72,6 +82,17 @@ public class QrTicketServiceImpl implements QrTicketService {
             qrTicket.setQrString(qrString);
 
             qrTicketRepository.addTicketDetails(qrTicket);
+
+            //http://localhost:3000/qr-loader/40000001
+            String urlForSendToCus = AppConstatnt.FRONTEND_BASE_URL+"qr-loader/"+ticketId;
+            logger.info("__________URL send for cus :"+urlForSendToCus);
+
+            String smsContent = "Hey Darazian! Congratulations, you have got yourself a Lunch Packet for Rs 1! " +
+                    "Click here to download the QR Code and Present it to collect " +
+                    "your Lunch Packet "+urlForSendToCus;
+
+            sendSMS(qrTicket.getMobileNo(), smsContent, ticketId);
+
             response.setResCode(1000);
             response.setResDescription("success");
             response.setQrString(qrString);
@@ -80,12 +101,64 @@ public class QrTicketServiceImpl implements QrTicketService {
             logger.info("__________DuplicateRecordException :"+e.getMessage());
             response.setResCode(AppConstatnt.RES_CODE_1002);
             response.setResDescription(e.getMessage());
+
+        } catch (InvalidFormatException e) {
+            logger.info("__________InvalidFormatException :"+e.getMessage());
+            response.setResCode(AppConstatnt.RES_CODE_1003);
+            response.setResDescription(e.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage());
             response.setResCode(AppConstatnt.RES_CODE_1999);
             response.setResDescription("Platform Failure");
         }
         return response;
+    }
+
+    private void sendSMS(String mobileNo, String smsContent, String refNo) throws NoSuchAlgorithmException, InvalidFormatException, URISyntaxException, SendSmsException, JsonProcessingException {
+
+        logger.info("__________Send SMS to : "+mobileNo);
+
+
+        if (mobileNo.length() < 10) {
+            throw new InvalidFormatException("Invalid mobile no");
+        }
+
+        String formattedMobileNo = "94"+mobileNo.substring(mobileNo.length() - 9);
+        logger.info("______ 94 formatted mobile no :"+formattedMobileNo);
+
+
+
+        SmsSendRequest request = new SmsSendRequest();
+        MessageElement messageElement = new MessageElement();
+        List<MessageElement> messageElementList = new ArrayList<>();
+
+        messageElement.setClientRef(refNo);
+        messageElement.setNumber(formattedMobileNo);
+        messageElement.setMask("TEST");
+        messageElement.setText(smsContent);
+        messageElement.setCampaignName("Darazian campaign");
+
+        messageElementList.add(messageElement);
+
+        request.setMessages(messageElementList);
+
+        logger.info(request.toString());
+
+        SmsApiClient smsApiClient = new SmsApiClient();
+        smsApiClient.sendSMS(request);
+
+    }
+
+
+    private static byte[] digest(byte[] input) {
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e);
+        }
+        byte[] result = md.digest(input);
+        return result;
     }
 
     @Override

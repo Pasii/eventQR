@@ -13,4 +13,5 @@ public interface QrTicketService {
     QrTicketResponse getQrString(int ticketId);
 
     Response updateTicketStatus(int tickectId, QrTicket qrTicket);
+
 }

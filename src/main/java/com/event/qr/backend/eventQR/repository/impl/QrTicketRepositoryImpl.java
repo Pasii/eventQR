@@ -60,7 +60,7 @@ public class QrTicketRepositoryImpl implements QrTicketRepository {
     @Override
     public String getQrStringByTicketId(int ticketId) throws SQLException{
 
-        String sql = "select qr_string from qrTicket.QR_TICKET where ticket_id = ? ";
+        String sql = "select qr_string from qrticket.QR_TICKET where ticket_id = ? ";
 
         return jdbcTemplate.queryForObject(sql,String.class,ticketId);
     }
@@ -68,14 +68,14 @@ public class QrTicketRepositoryImpl implements QrTicketRepository {
     @Override
     public String getTicketStatusBYTicketId(int tickectId) {
 
-        String sql = "select ticket_status from qrTicket.QR_TICKET where ticket_id = ? ";
+        String sql = "select ticket_status from qrticket.QR_TICKET where ticket_id = ? ";
         return jdbcTemplate.queryForObject(sql,String.class,tickectId);
     }
 
     @Override
     public void updateTicketStatus(int tickectId, String orderNo, String statusAdmitted) {
 
-        String sql = "update qrTicket.QR_TICKET set ticket_status = ? where " +
+        String sql = "update qrticket.QR_TICKET set ticket_status = ? where " +
                 "ticket_id = ? and order_no = ? and ticket_status = ?";
 
         jdbcTemplate.update(sql,new Object[]{statusAdmitted, tickectId, orderNo, AppConstatnt.STATUS_PENDING});
