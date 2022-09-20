@@ -14,7 +14,7 @@ public class AppConstatnt {
     public static final String ALREADY_PREOCESSED_MESSAGE = "Ticket is Already Admitted";
     public static final String TICKET_ADMITED_SUCCESS_MESSAGE = "Ticket has been Admitted successfully";
 
-    public static final String FRONTEND_BASE_URL = "http://localhost:3000/";
+    public static final String FRONTEND_BASE_URL = "https://production.d1peiyh6kw5bru.amplifyapp.com/";
 
     public static final String SMS_API_USER = "Afdhal@ede";
     public static final String SMS_API_PWD = "Dialog@123";

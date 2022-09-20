@@ -26,6 +26,7 @@ public class QRTicketController {
         return "This API is working......";
     }
 
+    @CrossOrigin(origins = "http://eventqr-env.eba-p5s7txsy.us-west-2.elasticbeanstalk.com/eventQR")
     @PostMapping("/ticket")
     public Response createQrTicket(@RequestBody QrTicket qrTicket) {
         logger.info("__________createQrTicket : request : "+qrTicket.toString());
@@ -39,7 +40,7 @@ public class QRTicketController {
      * @param qrString
      * @return
      */
-    @CrossOrigin(origins = "http://localhost:8080/eventQR")
+    @CrossOrigin(origins = "http://eventqr-env.eba-p5s7txsy.us-west-2.elasticbeanstalk.com/eventQR")
     @GetMapping("/ticket/{qrString}")
     public QrTicketResponse getQrTicketDetails(@PathVariable String qrString) {
         logger.info("__________getQrTicketDetails : qrId :"+qrString);
@@ -49,6 +50,7 @@ public class QRTicketController {
     }
 
     //return qr string according to cus reference
+    @CrossOrigin(origins = "http://eventqr-env.eba-p5s7txsy.us-west-2.elasticbeanstalk.com/eventQR")
     @GetMapping("/ticket/qr/{ticketId}")
     public QrTicketResponse getQrString(@PathVariable int ticketId) {
         logger.info("__________getQrString : ticketId :"+ticketId);
@@ -57,6 +59,7 @@ public class QRTicketController {
     }
 
     //set falg for scanned qr
+    @CrossOrigin(origins = "http://eventqr-env.eba-p5s7txsy.us-west-2.elasticbeanstalk.com/eventQR")
     @PutMapping("/ticket/status/{ticketId}")
     public Response updateTicketStatus(@PathVariable(value = "ticketId") int tickectId ,@RequestBody QrTicket qrTicket) {
 
