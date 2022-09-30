@@ -10,8 +10,8 @@ public interface QrTicketService {
 
     QRGeneratorResponse createTicket(QrTicket qrTicket);
 
-    QrTicketResponse getQrString(int ticketId);
+    QrTicketResponse getQrString(String ticketId);
 
-    Response updateTicketStatus(int tickectId, QrTicket qrTicket);
+    Response updateTicketStatus(String tickectId, QrTicket qrTicket);
 
 }

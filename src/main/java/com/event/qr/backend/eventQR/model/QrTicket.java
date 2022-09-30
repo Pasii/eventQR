@@ -1,5 +1,7 @@
 package com.event.qr.backend.eventQR.model;
 
+import java.util.List;
+
 public class QrTicket {
 
     private int id;
@@ -9,6 +11,7 @@ public class QrTicket {
     private String qrString;
     private int noOfTickets;
     private String ticketStatus;
+    private List<TicketType> ticketTypeList;
 
     public int getId() {
         return id;
@@ -66,6 +69,14 @@ public class QrTicket {
         this.ticketId = ticketId;
     }
 
+    public List<TicketType> getTicketTypeList() {
+        return ticketTypeList;
+    }
+
+    public void setTicketTypeList(List<TicketType> ticketTypeList) {
+        this.ticketTypeList = ticketTypeList;
+    }
+
     @Override
     public String toString() {
         return "QrTicket{" +
@@ -76,6 +87,7 @@ public class QrTicket {
                 ", qrString='" + qrString + '\'' +
                 ", noOfTickets=" + noOfTickets +
                 ", ticketStatus='" + ticketStatus + '\'' +
+                ", ticketTypeList=" + ticketTypeList +
                 '}';
     }
 }

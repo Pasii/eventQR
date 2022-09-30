@@ -17,5 +17,5 @@ public class AppConstatnt {
     public static final String FRONTEND_BASE_URL = "https://production.d1peiyh6kw5bru.amplifyapp.com/";
 
     public static final String SMS_API_USER = "Afdhal@ede";
-    public static final String SMS_API_PWD = "Dialog@123";
+    public static final String SMS_API_PWD = "Afdhal@321";
 }

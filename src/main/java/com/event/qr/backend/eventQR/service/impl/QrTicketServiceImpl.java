@@ -11,6 +11,7 @@ import com.event.qr.backend.eventQR.exception.InvalidFormatException;
 import com.event.qr.backend.eventQR.exception.SendSmsException;
 import com.event.qr.backend.eventQR.model.MessageElement;
 import com.event.qr.backend.eventQR.model.QrTicket;
+import com.event.qr.backend.eventQR.model.TicketType;
 import com.event.qr.backend.eventQR.repository.QrTicketRepository;
 import com.event.qr.backend.eventQR.service.QrTicketService;
 import com.event.qr.backend.eventQR.util.AppConstatnt;
@@ -28,6 +29,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Service
 public class QrTicketServiceImpl implements QrTicketService {
@@ -45,6 +48,11 @@ public class QrTicketServiceImpl implements QrTicketService {
         try {
 
             QrTicket qrTicket = qrTicketRepository.getQrTicketDetailsByQrString(qrString);
+
+            if (qrTicket != null) {
+            List<TicketType> ticketTypeList = qrTicketRepository.getTicketTypeListByOrderNo(qrTicket.getOrderNo());
+            qrTicket.setTicketTypeList(ticketTypeList);
+            }
             response.setObject(qrTicket);
             response.setResCode(1000);
             response.setResDescription("Success");
@@ -91,7 +99,7 @@ public class QrTicketServiceImpl implements QrTicketService {
                     "Click here to download the QR Code and Present it to collect " +
                     "your Lunch Packet "+urlForSendToCus;
 
-            sendSMS(qrTicket.getMobileNo(), smsContent, ticketId);
+            sendSMS(qrTicket.getMobileNo(), smsContent, ticketId); //todo - temparary commented
 
             response.setResCode(1000);
             response.setResDescription("success");
@@ -102,10 +110,10 @@ public class QrTicketServiceImpl implements QrTicketService {
             response.setResCode(AppConstatnt.RES_CODE_1002);
             response.setResDescription(e.getMessage());
 
-        } catch (InvalidFormatException e) {
-            logger.info("__________InvalidFormatException :"+e.getMessage());
-            response.setResCode(AppConstatnt.RES_CODE_1003);
-            response.setResDescription(e.getMessage());
+//        } catch (InvalidFormatException e) {
+//            logger.info("__________InvalidFormatException :"+e.getMessage());
+//            response.setResCode(AppConstatnt.RES_CODE_1003);
+//            response.setResDescription(e.getMessage());
         } catch (Exception e) {
             logger.error(e.getMessage());
             response.setResCode(AppConstatnt.RES_CODE_1999);
@@ -162,7 +170,7 @@ public class QrTicketServiceImpl implements QrTicketService {
     }
 
     @Override
-    public QrTicketResponse getQrString(int ticketId) {
+    public QrTicketResponse getQrString(String ticketId) {
         String qrString = null;
         QrTicketResponse response = new QrTicketResponse();
         try {
@@ -186,7 +194,7 @@ public class QrTicketServiceImpl implements QrTicketService {
     }
 
     @Override
-    public Response updateTicketStatus(int tickectId, QrTicket qrTicket) {
+    public Response updateTicketStatus(String tickectId, QrTicket qrTicket) {
 
         Response response= new Response();
         try {
@@ -215,7 +223,7 @@ public class QrTicketServiceImpl implements QrTicketService {
         return response;
     }
 
-    private void checkIsAlreadyAdmitedQr(int tickectId) throws AlreadyProcessedException,EmptyResultDataAccessException  {
+    private void checkIsAlreadyAdmitedQr(String tickectId) throws AlreadyProcessedException,EmptyResultDataAccessException  {
 
         String ticketStatus = qrTicketRepository.getTicketStatusBYTicketId(tickectId);
         logger.info("status :"+ticketStatus);
@@ -226,13 +234,15 @@ public class QrTicketServiceImpl implements QrTicketService {
 
 
     private String generateTicketId(int noOfTickets, String orderNo) {
-        return noOfTickets+orderNo;
+        Random random = new Random();
+        String id = String.format("%04d", random.nextInt(10000));
+        return id+orderNo;
     }
 
     private String getHashedQrString(String mobileNo, String orderNo, int noOfTickets) throws NoSuchAlgorithmException {
 
         String currentTimestamp = String.valueOf(System.currentTimeMillis());
-        String qrStr = mobileNo + orderNo + noOfTickets + currentTimestamp;
+        String qrStr = orderNo + currentTimestamp;
         final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
         final byte[] hashbytes = digest.digest(
                 qrStr.getBytes(StandardCharsets.UTF_8));

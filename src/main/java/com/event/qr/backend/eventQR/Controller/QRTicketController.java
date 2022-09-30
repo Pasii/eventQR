@@ -52,7 +52,7 @@ public class QRTicketController {
     //return qr string according to cus reference
     @CrossOrigin(origins = "http://eventqr-env.eba-p5s7txsy.us-west-2.elasticbeanstalk.com/eventQR")
     @GetMapping("/ticket/qr/{ticketId}")
-    public QrTicketResponse getQrString(@PathVariable int ticketId) {
+    public QrTicketResponse getQrString(@PathVariable String ticketId) {
         logger.info("__________getQrString : ticketId :"+ticketId);
         QrTicketResponse qrTicketResponse = qrTicketService.getQrString(ticketId);
         return qrTicketResponse;
@@ -61,7 +61,7 @@ public class QRTicketController {
     //set falg for scanned qr
     @CrossOrigin(origins = "http://eventqr-env.eba-p5s7txsy.us-west-2.elasticbeanstalk.com/eventQR")
     @PutMapping("/ticket/status/{ticketId}")
-    public Response updateTicketStatus(@PathVariable(value = "ticketId") int tickectId ,@RequestBody QrTicket qrTicket) {
+    public Response updateTicketStatus(@PathVariable(value = "ticketId") String tickectId ,@RequestBody QrTicket qrTicket) {
 
         logger.info("__________ticketId : "+tickectId);
         logger.info("__________updateTicketStatus : request :"+qrTicket);

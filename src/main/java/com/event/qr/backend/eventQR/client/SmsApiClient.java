@@ -65,7 +65,7 @@ public class SmsApiClient {
         SmsSendResponse resObj = objectMapper.readValue(jsonInput, new TypeReference<SmsSendResponse>(){});
 
         logger.info("&&&&&&&&&&&&&&&&&&&&&&&&&&&response "+resObj.toString());
-        if (resObj.getResultCode() != 0) {
+        if (resObj.getMessages().get(0).getResultCode() != 0) {
             throw new SendSmsException("Sending sms failed");
         }
 
