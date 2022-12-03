@@ -2,8 +2,11 @@ package com.event.qr.backend.eventQR.dto;
 
 import com.event.qr.backend.eventQR.model.QrTicket;
 
+import java.util.List;
+
 public class QrTicketResponse extends Response{
 
+    List<Object> objectList;
     Object object;
     String qrString;
 
@@ -23,10 +26,19 @@ public class QrTicketResponse extends Response{
         this.qrString = qrString;
     }
 
+    public List<Object> getObjectList() {
+        return objectList;
+    }
+
+    public void setObjectList(List<Object> objectList) {
+        this.objectList = objectList;
+    }
+
     @Override
     public String toString() {
         return "QrTicketResponse{" +
-                "object=" + object +
+                "objectList=" + objectList +
+                ", object=" + object +
                 ", qrString='" + qrString + '\'' +
                 '}';
     }

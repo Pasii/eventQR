@@ -2,8 +2,18 @@ package com.event.qr.backend.eventQR.model;
 
 public class TicketType {
 
+    private long id;
     private String ticketType;
     private int ticketCount;
+    private String variation;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getTicketType() {
         return ticketType;
@@ -21,11 +31,21 @@ public class TicketType {
         this.ticketCount = ticketCount;
     }
 
+    public String getVariation() {
+        return variation;
+    }
+
+    public void setVariation(String variation) {
+        this.variation = variation;
+    }
+
     @Override
     public String toString() {
         return "TicketType{" +
-                "ticketType='" + ticketType + '\'' +
-                ", ticketCount='" + ticketCount + '\'' +
+                "id=" + id +
+                ", ticketType='" + ticketType + '\'' +
+                ", ticketCount=" + ticketCount +
+                ", variation='" + variation + '\'' +
                 '}';
     }
 }

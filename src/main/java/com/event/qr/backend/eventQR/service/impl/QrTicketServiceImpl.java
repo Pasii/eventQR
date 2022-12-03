@@ -1,17 +1,12 @@
 package com.event.qr.backend.eventQR.service.impl;
 
 import com.event.qr.backend.eventQR.client.SmsApiClient;
-import com.event.qr.backend.eventQR.dto.QRGeneratorResponse;
-import com.event.qr.backend.eventQR.dto.QrTicketResponse;
-import com.event.qr.backend.eventQR.dto.Response;
-import com.event.qr.backend.eventQR.dto.SmsSendRequest;
+import com.event.qr.backend.eventQR.dto.*;
 import com.event.qr.backend.eventQR.exception.AlreadyProcessedException;
 import com.event.qr.backend.eventQR.exception.DuplicateRecordException;
 import com.event.qr.backend.eventQR.exception.InvalidFormatException;
 import com.event.qr.backend.eventQR.exception.SendSmsException;
-import com.event.qr.backend.eventQR.model.MessageElement;
-import com.event.qr.backend.eventQR.model.QrTicket;
-import com.event.qr.backend.eventQR.model.TicketType;
+import com.event.qr.backend.eventQR.model.*;
 import com.event.qr.backend.eventQR.repository.QrTicketRepository;
 import com.event.qr.backend.eventQR.service.QrTicketService;
 import com.event.qr.backend.eventQR.util.AppConstatnt;
@@ -51,16 +46,25 @@ public class QrTicketServiceImpl implements QrTicketService {
 
             if (qrTicket != null) {
             List<TicketType> ticketTypeList = qrTicketRepository.getTicketTypeListByOrderNo(qrTicket.getOrderNo());
+            if (ticketTypeList.isEmpty()) {
+                response.setObject(qrTicket);
+                throw new AlreadyProcessedException("All tickets have been admited");
+            }
             qrTicket.setTicketTypeList(ticketTypeList);
             }
             response.setObject(qrTicket);
             response.setResCode(1000);
             response.setResDescription("Success");
 
+
         } catch (EmptyResultDataAccessException e) {
             logger.info("__________No records found for id...");
             response.setResCode(1001);
             response.setResDescription("No records found");
+        }  catch (AlreadyProcessedException e) {
+            logger.info("__________AlreadyProcessedException " + e.getMessage());
+            response.setResCode(1002);
+            response.setResDescription(e.getMessage());
         } catch (Exception e) {
             logger.error(e);
             response.setResCode(1999);
@@ -176,12 +180,16 @@ public class QrTicketServiceImpl implements QrTicketService {
         try {
 
             qrString = qrTicketRepository.getQrStringByTicketId(ticketId);
+
+            Sku sku = qrTicketRepository.getSkuDetailsByTicketId(ticketId);
+
+            response.setObject(sku);
             response.setResCode(AppConstatnt.RES_CODE_SUCCESS);
             response.setResDescription("success");
             response.setQrString(qrString);
 
         } catch (EmptyResultDataAccessException e) {
-            logger.info("__________No records found for id...");
+            logger.info("__________No records found for id..."+e);
             response.setResCode(AppConstatnt.RES_CODE_1001);
             response.setResDescription("No records found");
 
@@ -200,9 +208,13 @@ public class QrTicketServiceImpl implements QrTicketService {
         try {
 
             //check is already admited qr
-            checkIsAlreadyAdmitedQr(tickectId);
+            //checkIsAlreadyAdmitedQr(tickectId);
 
-            qrTicketRepository.updateTicketStatus(tickectId,qrTicket.getOrderNo(),AppConstatnt.STATUS_ADMITTED);
+            if (qrTicket.getSelectedList().isEmpty()) {
+                throw new Exception("Please select ticket type");
+            }
+
+            qrTicketRepository.updateTicketStatus(tickectId,qrTicket.getOrderNo(),AppConstatnt.STATUS_ADMITTED,qrTicket.getSelectedList());
 
             response.setResCode(AppConstatnt.RES_CODE_SUCCESS);
             response.setResDescription(AppConstatnt.TICKET_ADMITED_SUCCESS_MESSAGE);
@@ -219,6 +231,94 @@ public class QrTicketServiceImpl implements QrTicketService {
             logger.error(e.getMessage());
             response.setResCode(AppConstatnt.RES_CODE_1999);
             response.setResDescription("Platform Failure");
+        }
+        return response;
+    }
+
+    @Override
+    public QrTicketResponse getQrStringByOrderNo(String orderNo) {
+
+        logger.info("__________QrTicketServiceImpl : getQrTicketDetails...");
+        QrTicketResponse response = new QrTicketResponse();
+        try {
+
+            QrTicket qrTicket = qrTicketRepository.getQrTicketDetailsByOrderNo(orderNo);
+
+            if (qrTicket != null) {
+                List<TicketType> ticketTypeList = qrTicketRepository.getTicketTypeListByOrderNo(qrTicket.getOrderNo());
+                if (ticketTypeList.isEmpty()) {
+                    response.setObject(qrTicket);
+                    throw new AlreadyProcessedException("All tickets have been admited");
+                }
+                qrTicket.setTicketTypeList(ticketTypeList);
+            }
+            response.setObject(qrTicket);
+            response.setResCode(1000);
+            response.setResDescription("Success");
+
+        } catch (EmptyResultDataAccessException e) {
+            logger.info("__________No records found for orderno...");
+            response.setResCode(1001);
+            response.setResDescription("No records found");
+        } catch (AlreadyProcessedException e) {
+            logger.info("__________AlreadyProcessedException " + e.getMessage());
+            response.setResCode(1002);
+            response.setResDescription(e.getMessage());
+        } catch (Exception e) {
+            logger.error(e);
+            response.setResCode(1999);
+            response.setResDescription("Platform Failure");
+        }
+        return response;
+    }
+
+    @Override
+    public QrTicketResponse getSkuDetails(String orderNo) {
+        String qrString = null;
+        QrTicketResponse response = new QrTicketResponse();
+        try {
+
+            //qrString = qrTicketRepository.getQrString;
+
+            List<SkuTicketTypeResponse> sku = qrTicketRepository.getSkuDetailsByOrderNo(orderNo);
+
+            if (!sku.isEmpty()) {
+
+                response.setObject(sku);
+                response.setResCode(AppConstatnt.RES_CODE_SUCCESS);
+                response.setResDescription("success");
+
+                response.setQrString(sku.get(0).getQrString());
+            } else {
+                throw new EmptyResultDataAccessException("",1);
+            }
+
+
+        } catch (EmptyResultDataAccessException e) {
+            logger.info("__________No records found for id...");
+            response.setResCode(AppConstatnt.RES_CODE_1001);
+            response.setResDescription("No records found");
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            response.setResCode(AppConstatnt.RES_CODE_1999);
+            response.setResDescription("Platform Failure");
+        }
+        return response;
+    }
+
+    @Override
+    public QRTicketReportResponse getTicketReportDetails(QRTicketReportRequest request) {
+        QRTicketReportResponse response = new QRTicketReportResponse();
+        try {
+
+            List<QrTicketReport> qrTicketList = qrTicketRepository.getQrTicketReportDetails(request);
+            response.setQrTicketDetailsList(qrTicketList);
+            response.setResCode(1000);
+            response.setResDescription("Success");
+
+        } catch (Exception e) {
+            logger.error("_____Exception "+e.getMessage());
         }
         return response;
     }
